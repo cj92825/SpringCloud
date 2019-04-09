@@ -1,0 +1,45 @@
+plugins {
+    id 'java'
+}
+
+group 'com.springboot'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+repositories {
+  maven { url = 'https://maven.aliyun.com/repository/central' }
+    mavenCentral()
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    compile('org.springframework.boot:spring-boot-starter-web')
+    //获取配置需要用到的依赖
+    compile('org.springframework.cloud:spring-cloud-starter-config')
+    compile('org.springframework.cloud:spring-cloud-starter-netflix-eureka-client')
+    compile('org.springframework.cloud:spring-cloud-starter-config')
+    //消息bus用到的类
+    compile('org.springframework.cloud:spring-cloud-starter-bus-amqp')
+    compile('org.springframework.boot:spring-boot-starter-actuator')
+    //
+
+}
+
+task copyDependencies(type: Copy) {
+    from configurations.runtime
+    into 'build/libs/lib'
+}
+jar.dependsOn(copyDependencies)
+
+jar {
+    manifest {
+        attributes "Implementation-Title": 'config-client'
+        attributes "Implementation-Version": '1.0.0'
+        attributes 'Main-Class': 'com.springboot.config_client.ConfigClientApplication'
+    }
+
+    if (!configurations.runtime.isEmpty()) {
+        manifest.attributes('Class-Path': '. lib/' + configurations.runtime.collect { it.name }.join(' lib/'))
+    }
+}

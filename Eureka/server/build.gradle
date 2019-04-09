@@ -1,0 +1,35 @@
+plugins {
+    id 'java'
+}
+
+group 'com.springboot'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    compile('org.springframework.cloud:spring-cloud-starter-netflix-eureka-server')
+
+}
+task copyDependencies(type: Copy) {
+    from configurations.runtime
+    into 'build/libs/lib'
+}
+jar.dependsOn(copyDependencies)
+
+jar {
+    manifest {
+        attributes "Implementation-Title": 'client'
+        attributes "Implementation-Version": '1.0.0'
+        attributes 'Main-Class': 'com.springboot.server.EurekaServerApplication'
+    }
+
+    if (!configurations.runtime.isEmpty()) {
+        manifest.attributes('Class-Path': '. lib/' + configurations.runtime.collect { it.name }.join(' lib/'))
+    }
+}
